@@ -15,7 +15,6 @@ A modern take on the classic Tetris game, built with HTML, CSS, and JavaScript. 
 1. Clone the repository: `git clone https://github.com/Mrskuhle/TETRIS-2.0.git`
 2. Open `index.html` in a browser.
 
-## Screenshots
-![Tetris 2.0](images/tetris-screenshot.jpg)
+
 
 
