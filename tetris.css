@@ -15,8 +15,8 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  touch-action: none; /* Prevent pinch-zoom on mobile */
 }
-
 
 .game-container {
   background-color: rgba(0, 0, 0, 0.6);
@@ -64,6 +64,16 @@ h1 {
   margin-top: 20px;
 }
 
+#joystick-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 100px;
+  height: 100px;
+  z-index: 1000;
+  display: none; /* Hidden on desktop */
+}
+
 @media (max-width: 768px) {
   h1 {
     font-size: 18px;
@@ -81,6 +91,10 @@ h1 {
   #gameCanvas {
     width: 200px;
     height: 400px;
+  }
+
+  #joystick-container {
+    display: block; /* Show joystick on mobile */
   }
 }
 
