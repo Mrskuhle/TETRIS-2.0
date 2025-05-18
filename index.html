@@ -4,18 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>TETRIS</title>
-  internals="true">
   <link rel="stylesheet" href="tetris.css">
 </head>
 <body>
   <div class="game-container">
     <h1>TETRIS</h1>
+    <button id="mute-button">🔊</button>
     <div class="game-info">
       <p>Score: <span id="score">0</span></p>
       <button id="start-button">Start</button>
     </div>
     <canvas id="gameCanvas" width="240" height="480"></canvas>
-    <div id="joystick-container"></div>
+    <div id="control-zone">
+      <div class="move-buttons">
+        <button id="left-button">←</button>
+        <button id="down-button">↓</button>
+        <button id="right-button">→</button>
+      </div>
+      <div class="action-buttons">
+        <button id="rotate-button">↻</button>
+        <button id="hard-drop-button">⬇</button>
+      </div>
+    </div>
   </div>
 
   <!-- Audio files -->
@@ -23,7 +33,6 @@
   <audio id="fireworksSound" src="fireworks-sound-280715.mp3" preload="auto"></audio>
   <audio id="gameOverSound" src="game-over-arcade-6435.mp3" preload="auto"></audio>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"></script>
   <script src="tetris.js"></script>
 </body>
 </html>
