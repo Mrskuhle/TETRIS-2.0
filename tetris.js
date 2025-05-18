@@ -308,7 +308,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === ' ') { // hard-drop
     while (!current.collision(0,1,current.active)) {
       current.unDraw();
-      current.y++;
+      this.y++;
       current.draw();
     }
     current.lock();
