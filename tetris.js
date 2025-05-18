@@ -6,15 +6,15 @@
      game-over-arcade-6435.mp3  ➜ plays on game-over
    ───────────────────────────────────────────────────────────── */
 
-const canvas       = document.getElementById('gameCanvas');
-const ctx          = canvas.getContext('2d');
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
-const startButton  = document.getElementById('start-button');
+const startButton = document.getElementById('start-button');
 
 /* Board settings */
 const ROW = 20;
 const COL = 10;
-const SQ  = 24;
+const SQ = 24;
 const VACANT = '#FFFFFF';
 
 /* Tetromino definitions ---------------------------------------------------- */
@@ -57,9 +57,9 @@ const PIECES = [
 ];
 
 /* ── Sounds ───────────────────────────────────────────────── */
-const sBrick     = new Audio('bricks-fall-315300.mp3');   // drop click
-const sFireworks = new Audio('fireworks-sound-280715.mp3');// level-up
-const sGameOver  = new Audio('game-over-arcade-6435.mp3'); // game-over
+const sBrick = new Audio('bricks-fall-315300.mp3'); // drop click
+const sFireworks = new Audio('fireworks-sound-280715.mp3'); // level-up
+const sGameOver = new Audio('game-over-arcade-6435.mp3'); // game-over
 
 /* ── Board setup ─────────────────────────────────────────── */
 let board = Array.from({ length: ROW }, () => Array(COL).fill(VACANT));
@@ -77,12 +77,12 @@ function drawBoard() {
 
 /* ── Piece object ----------------------------------------------------------- */
 function Piece(shape, color) {
-  this.shape   = shape;
-  this.color   = color;
-  this.index   = 0;                  // rotation index
-  this.active  = this.shape[this.index];
-  this.x       = 3;
-  this.y       = -2;
+  this.shape = shape;
+  this.color = color;
+  this.index = 0; // rotation index
+  this.active = this.shape[this.index];
+  this.x = 3;
+  this.y = -2;
 }
 
 Piece.prototype._fill = function (clr) {
@@ -90,8 +90,8 @@ Piece.prototype._fill = function (clr) {
     row.forEach((v, c) => v && drawSquare(this.x + c, this.y + r, clr))
   );
 };
-Piece.prototype.draw    = function () { this._fill(this.color); };
-Piece.prototype.unDraw  = function () { this._fill(VACANT); };
+Piece.prototype.draw = function () { this._fill(this.color); };
+Piece.prototype.unDraw = function () { this._fill(VACANT); };
 
 Piece.prototype.collision = function (dx, dy, pattern) {
   for (let r = 0; r < pattern.length; r++) {
@@ -112,15 +112,15 @@ Piece.prototype.moveDown = function () {
     this.unDraw();
     this.y++;
     this.draw();
-    sBrick.currentTime = 0;  // click every row drop
+    sBrick.currentTime = 0; // click every row drop
     sBrick.play();
   } else {
     this.lock();
     current = randomPiece();
   }
 };
-Piece.prototype.moveLeft  = function () { !this.collision(-1,0,this.active) && (this.unDraw(), this.x--, this.draw()); };
-Piece.prototype.moveRight = function () { !this.collision( 1,0,this.active) && (this.unDraw(), this.x++, this.draw()); };
+Piece.prototype.moveLeft = function () { !this.collision(-1,0,this.active) && (this.unDraw(), this.x--, this.draw()); };
+Piece.prototype.moveRight = function () { !this.collision(1,0,this.active) && (this.unDraw(), this.x++, this.draw()); };
 
 Piece.prototype.rotate = function () {
   const next = this.shape[(this.index + 1) % this.shape.length];
@@ -158,7 +158,7 @@ Piece.prototype.lock = function () {
   /* level-up every 100 pts, max 5 */
   if (score >= level * 100 && level < 5) {
     level++;
-    dropDelay = Math.max(100, dropDelay - 150);   // speed up
+    dropDelay = Math.max(100, dropDelay - 150); // speed up
     showLevelUp(level);
   }
 
@@ -169,15 +169,15 @@ Piece.prototype.lock = function () {
 /* ── Fireworks visual ------------------------------------------------------- */
 class Particle {
   constructor(x, y, color) {
-    this.x   = x;          this.y = y;
-    this.r   = Math.random()*3 + 2;
-    this.c   = color;
-    this.vx  = (Math.random()-0.5) * 6;
-    this.vy  = (Math.random()-0.5) * 6;
-    this.a   = 1;          this.decay = 0.02;
+    this.x = x; this.y = y;
+    this.r = Math.random()*3 + 2;
+    this.c = color;
+    this.vx = (Math.random()-0.5) * 6;
+    this.vy = (Math.random()-0.5) * 6;
+    this.a = 1; this.decay = 0.02;
   }
   update() { this.x+=this.vx; this.y+=this.vy; this.a-=this.decay; }
-  draw()   {
+  draw() {
     ctx.save(); ctx.globalAlpha = this.a;
     ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
     ctx.fillStyle = this.c; ctx.fill(); ctx.restore();
@@ -217,13 +217,66 @@ function randomPiece() {
 
 /* ── Game state ------------------------------------------------------------- */
 let current = randomPiece();
-let score   = 0;
-let level   = 1;
-let dropDelay = 1000;          // ms between drops (changes with level)
+let score = 0;
+let level = 1;
+let dropDelay = 1000; // ms between drops (changes with level)
 let lastDrop = Date.now();
 let gameOver = false;
-let animId   = null;
-let failureCount = 0;          // Track number of failures
+let animId = null;
+let failureCount = 0; // Track number of failures
+
+/* ── Joystick Controls ------------------------------------------------------ */
+const joystickZone = document.getElementById('joystick-container');
+let joystick;
+if (joystickZone) {
+  joystick = nipplejs.create({
+    zone: joystickZone,
+    mode: 'static',
+    position: { left: '50%', top: '50%' },
+    color: '#00f2ff', // Matches your neon cyan theme
+    size: 100
+  });
+
+  let lastMoveTime = 0;
+  const moveCooldown = 150; // ms between joystick moves to prevent rapid inputs
+
+  joystick.on('move', (evt, data) => {
+    if (gameOver || !running) return;
+    const now = Date.now();
+    if (now - lastMoveTime < moveCooldown) return;
+    lastMoveTime = now;
+
+    const angle = data.angle.degree;
+    const force = data.force;
+
+    // Map angles to controls
+    if (angle >= 45 && angle < 135) { // Up: Rotate
+      current.rotate();
+    } else if (angle >= 135 && angle < 225) { // Left
+      current.moveLeft();
+    } else if (angle >= 225 && angle < 315) { // Down: Soft drop
+      current.moveDown();
+    } else if ((angle >= 315 || angle < 45) && force > 0.5) { // Right
+      current.moveRight();
+    }
+  });
+
+  joystick.on('end', () => {
+    lastMoveTime = 0; // Reset cooldown when joystick is released
+  });
+
+  // Tap for hard drop
+  joystick.on('plain:up', () => {
+    if (gameOver || !running) return;
+    while (!current.collision(0,1,current.active)) {
+      current.unDraw();
+      current.y++;
+      current.draw();
+    }
+    current.lock();
+    current = randomPiece();
+  });
+}
 
 /* ── Main loop -------------------------------------------------------------- */
 function drop() {
@@ -248,13 +301,18 @@ function endGame() {
 /* ── Controls --------------------------------------------------------------- */
 document.addEventListener('keydown', e => {
   if (gameOver) return;
-  if (e.key==='ArrowLeft')  current.moveLeft();
-  else if (e.key==='ArrowRight') current.moveRight();
-  else if (e.key==='ArrowDown')  current.moveDown();
-  else if (e.key==='ArrowUp')    current.rotate();
-  else if (e.key===' '){ // hard-drop
-    while(!current.collision(0,1,current.active)){current.unDraw(); current.y++; current.draw();}
-    current.lock(); current = randomPiece();
+  if (e.key === 'ArrowLeft') current.moveLeft();
+  else if (e.key === 'ArrowRight') current.moveRight();
+  else if (e.key === 'ArrowDown') current.moveDown();
+  else if (e.key === 'ArrowUp') current.rotate();
+  else if (e.key === ' ') { // hard-drop
+    while (!current.collision(0,1,current.active)) {
+      current.unDraw();
+      current.y++;
+      current.draw();
+    }
+    current.lock();
+    current = randomPiece();
   }
 });
 
@@ -262,15 +320,30 @@ document.addEventListener('keydown', e => {
 let running = false;
 startButton.addEventListener('click', () => {
   if (gameOver) { resetGame(); return; }
-  if (!running) { running=true; lastDrop=Date.now(); drop(); startButton.textContent='Pause'; }
-  else { running=false; cancelAnimationFrame(animId); startButton.textContent='Resume'; }
+  if (!running) {
+    running = true;
+    lastDrop = Date.now();
+    drop();
+    startButton.textContent = 'Pause';
+  } else {
+    running = false;
+    cancelAnimationFrame(animId);
+    startButton.textContent = 'Resume';
+  }
 });
 
 /* ── Reset game ------------------------------------------------------------- */
 function resetGame() {
-  board = Array.from({length:ROW},()=>Array(COL).fill(VACANT));
-  score = 0; level = 1; dropDelay = 1000; gameOver=false; running=false;
+  board = Array.from({ length: ROW }, () => Array(COL).fill(VACANT));
+  score = 0;
+  level = 1;
+  dropDelay = 1000;
+  gameOver = false;
+  running = false;
   failureCount = 0; // Reset failure count
-  current = randomPiece(); drawBoard(); current.draw();
-  scoreDisplay.textContent = 0; startButton.textContent = 'Start';
+  current = randomPiece();
+  drawBoard();
+  current.draw();
+  scoreDisplay.textContent = 0;
+  startButton.textContent = 'Start';
 }
