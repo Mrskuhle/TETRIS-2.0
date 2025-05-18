@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>TETRIS</title>
+  internals="true">
   <link rel="stylesheet" href="tetris.css">
 </head>
 <body>
@@ -14,6 +15,7 @@
       <button id="start-button">Start</button>
     </div>
     <canvas id="gameCanvas" width="240" height="480"></canvas>
+    <div id="joystick-container"></div>
   </div>
 
   <!-- Audio files -->
@@ -21,7 +23,9 @@
   <audio id="fireworksSound" src="fireworks-sound-280715.mp3" preload="auto"></audio>
   <audio id="gameOverSound" src="game-over-arcade-6435.mp3" preload="auto"></audio>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"></script>
   <script src="tetris.js"></script>
 </body>
 </html>
+
 
