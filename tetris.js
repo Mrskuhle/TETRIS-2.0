@@ -10,6 +10,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
 const startButton = document.getElementById('start-button');
+const muteButton = document.getElementById('mute-button');
 
 /* Board settings */
 const ROW = 20;
@@ -60,6 +61,31 @@ const PIECES = [
 const sBrick = new Audio('bricks-fall-315300.mp3'); // drop click
 const sFireworks = new Audio('fireworks-sound-280715.mp3'); // level-up
 const sGameOver = new Audio('game-over-arcade-6435.mp3'); // game-over
+let isMuted = false;
+
+// Initialize audio states
+[sBrick, sFireworks, sGameOver].forEach(audio => {
+  audio.muted = isMuted;
+  audio.volume = isMuted ? 0 : 1;
+});
+
+/* ── Mute Functionality ───────────────────────────────────── */
+function toggleMute() {
+  isMuted = !isMuted;
+  [sBrick, sFireworks, sGameOver].forEach(audio => {
+    audio.muted = isMuted;
+    audio.volume = isMuted ? 0 : 1;
+    if (isMuted) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  });
+  muteButton.textContent = isMuted ? '🔇' : '🔊';
+}
+
+if (muteButton) {
+  muteButton.addEventListener('click', toggleMute);
+}
 
 /* ── Board setup ─────────────────────────────────────────── */
 let board = Array.from({ length: ROW }, () => Array(COL).fill(VACANT));
@@ -112,8 +138,12 @@ Piece.prototype.moveDown = function () {
     this.unDraw();
     this.y++;
     this.draw();
-    sBrick.currentTime = 0; // click every row drop
-    sBrick.play();
+    if (!isMuted) {
+      try {
+        sBrick.currentTime = 0;
+        sBrick.play().catch(() => {}); // Handle play errors
+      } catch (e) {}
+    }
   } else {
     this.lock();
     current = randomPiece();
@@ -202,7 +232,12 @@ function animateFireworks(particles) {
 
 /* ── Level-up message & fireworks ------------------------------------------ */
 function showLevelUp(lv) {
-  sFireworks.currentTime = 0; sFireworks.play();
+  if (!isMuted) {
+    try {
+      sFireworks.currentTime = 0;
+      sFireworks.play().catch(() => {});
+    } catch (e) {}
+  }
   ctx.fillStyle = '#00FF00';
   ctx.font = 'bold 30px Arial';
   ctx.fillText(`Level ${lv}!`, canvas.width/4, canvas.height/2 - 40);
@@ -225,49 +260,27 @@ let gameOver = false;
 let animId = null;
 let failureCount = 0; // Track number of failures
 
-/* ── Joystick Controls ------------------------------------------------------ */
-const joystickZone = document.getElementById('joystick-container');
-let joystick;
-if (joystickZone) {
-  joystick = nipplejs.create({
-    zone: joystickZone,
-    mode: 'static',
-    position: { left: '50%', top: '50%' },
-    color: '#00f2ff', // Matches your neon cyan theme
-    size: 100
-  });
+/* ── Mobile Button Controls -------------------------------------------------- */
+const leftButton = document.getElementById('left-button');
+const rightButton = document.getElementById('right-button');
+const downButton = document.getElementById('down-button');
+const rotateButton = document.getElementById('rotate-button');
+const hardDropButton = document.getElementById('hard-drop-button');
 
-  let lastMoveTime = 0;
-  const moveCooldown = 150; // ms between joystick moves to prevent rapid inputs
+let lastMoveTime = 0;
+const moveCooldown = 100; // ms between button presses
 
-  joystick.on('move', (evt, data) => {
-    if (gameOver || !running) return;
-    const now = Date.now();
-    if (now - lastMoveTime < moveCooldown) return;
-    lastMoveTime = now;
+function handleButtonPress(action) {
+  if (gameOver || !running) return;
+  const now = Date.now();
+  if (now - lastMoveTime < moveCooldown) return;
+  lastMoveTime = now;
 
-    const angle = data.angle.degree;
-    const force = data.force;
-
-    // Map angles to controls
-    if (angle >= 45 && angle < 135) { // Up: Rotate
-      current.rotate();
-    } else if (angle >= 135 && angle < 225) { // Left
-      current.moveLeft();
-    } else if (angle >= 225 && angle < 315) { // Down: Soft drop
-      current.moveDown();
-    } else if ((angle >= 315 || angle < 45) && force > 0.5) { // Right
-      current.moveRight();
-    }
-  });
-
-  joystick.on('end', () => {
-    lastMoveTime = 0; // Reset cooldown when joystick is released
-  });
-
-  // Tap for hard drop
-  joystick.on('plain:up', () => {
-    if (gameOver || !running) return;
+  if (action === 'left') current.moveLeft();
+  else if (action === 'right') current.moveRight();
+  else if (action === 'down') current.moveDown();
+  else if (action === 'rotate') current.rotate();
+  else if (action === 'hard-drop') {
     while (!current.collision(0,1,current.active)) {
       current.unDraw();
       current.y++;
@@ -275,8 +288,20 @@ if (joystickZone) {
     }
     current.lock();
     current = randomPiece();
-  });
+  }
 }
+
+[leftButton, rightButton, downButton, rotateButton, hardDropButton].forEach(button => {
+  if (button) {
+    button.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      handleButtonPress(button.id.split('-')[0]);
+    });
+    button.addEventListener('mousedown', () => {
+      handleButtonPress(button.id.split('-')[0]);
+    });
+  }
+});
 
 /* ── Main loop -------------------------------------------------------------- */
 function drop() {
@@ -291,7 +316,12 @@ function drop() {
 /* ── Game-over -------------------------------------------------------------- */
 function endGame() {
   cancelAnimationFrame(animId);
-  sGameOver.currentTime = 0; sGameOver.play();
+  if (!isMuted) {
+    try {
+      sGameOver.currentTime = 0;
+      sGameOver.play().catch(() => {});
+    } catch (e) {}
+  }
   ctx.fillStyle = '#FF4444';
   ctx.font = '24px Poppins';
   ctx.fillText('Game Over', canvas.width/4, canvas.height/2);
@@ -308,7 +338,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === ' ') { // hard-drop
     while (!current.collision(0,1,current.active)) {
       current.unDraw();
-      this.y++;
+      current.y++;
       current.draw();
     }
     current.lock();
