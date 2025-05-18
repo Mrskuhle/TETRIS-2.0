@@ -24,6 +24,7 @@ body {
   border-radius: 20px;
   box-shadow: 0 0 25px #00f2ff88;
   text-align: center;
+  position: relative; /* For absolute positioning of mute button */
 }
 
 h1 {
@@ -57,6 +58,27 @@ h1 {
   transform: scale(1.05);
 }
 
+#mute-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 40px;
+  height: 40px;
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 2px solid #333333;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 0 5px #888888;
+  transition: transform 0.2s;
+}
+
+#mute-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px #FFFFFF;
+}
+
 #gameCanvas {
   border: 2px solid #00f2ff;
   background-color: #111;
@@ -64,14 +86,85 @@ h1 {
   margin-top: 20px;
 }
 
-#joystick-container {
+#control-zone {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 100px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   height: 100px;
-  z-index: 1000;
   display: none; /* Hidden on desktop */
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.move-buttons, .action-buttons {
+  display: flex;
+}
+
+.move-buttons {
+  gap: 10px;
+}
+
+.action-buttons {
+  flex-direction: column;
+  gap: 10px;
+}
+
+#left-button, #right-button, #down-button {
+  width: 60px;
+  height: 60px;
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 2px solid #333333;
+  border-radius: 8px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 0 5px #888888;
+  transition: transform 0.2s;
+}
+
+#rotate-button {
+  width: 60px;
+  height: 60px;
+  background-color: #FF0000;
+  color: #FFFFFF;
+  border: 2px solid #333333;
+  border-radius: 8px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 0 5px #888888;
+  transition: transform 0.2s;
+}
+
+#hard-drop-button {
+  width: 60px;
+  height: 60px;
+  background-color: #00FF00;
+  color: #FFFFFF;
+  border: 2px solid #333333;
+  border-radius: 8px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 0 5px #888888;
+  transition: transform 0.2s;
+}
+
+#left-button:active, #right-button:active, #down-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px #FFFFFF;
+}
+
+#rotate-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px #FF0000;
+}
+
+#hard-drop-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 10px #00FF00;
 }
 
 @media (max-width: 768px) {
@@ -93,8 +186,41 @@ h1 {
     height: 400px;
   }
 
-  #joystick-container {
-    display: block; /* Show joystick on mobile */
+  #control-zone {
+    display: flex; /* Show buttons on mobile */
+  }
+
+  #left-button, #right-button, #down-button,
+  #rotate-button, #hard-drop-button {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  #mute-button {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 400px) {
+  #left-button, #right-button, #down-button,
+  #rotate-button, #hard-drop-button {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+
+  #control-zone {
+    height: 80px;
+    padding: 5px;
+  }
+
+  #mute-button {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
   }
 }
 
